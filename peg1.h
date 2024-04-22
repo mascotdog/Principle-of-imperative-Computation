@@ -50,7 +50,9 @@ htkey board_state_get(int* B) {
 
 long long state_get(int* B) {
 	long long x = 0;
-	for (int i = 0; i < 64; i++)if (B[i] == 1)x += 1 << (i);
+	for (int i = 0; i < 64; i++)
+		if (B[i] == 1)
+			x += (long long)1 << i;
 	return x;
 }
 
@@ -117,7 +119,7 @@ void get_operation(int* B,int position, stack operation) {
 	return;
 }
 //void excute(int* B, int row_s, int col_s, int row_e, int col_e, bool op, htkey state)
-void excute(int* B, int row_s, int col_s, int row_e, int col_e) {
+void excute(int* B, int row_s, int col_s, int row_e, int col_e,long long* st) {
 	int mid_r = row_s + row_e >> 1;
 	int mid_c = col_s + col_e >> 1;
 	int s = row_s * 8 + col_s;
@@ -126,14 +128,16 @@ void excute(int* B, int row_s, int col_s, int row_e, int col_e) {
 	B[s] ^= 1;
 	B[m] ^= 1;
 	B[e] ^= 1;
-
+	*st ^= (long long)1<<s;
+	*st ^= (long long)1<<m;
+	*st ^= (long long)1<<e;
 	//s < 32 ? state->i1 ^= 1 << s : state->i2 ^= 1 << (s - 32);
 	//m < 32 ? state->i1 ^= 1 << m : state->i2 ^= 1 << (m - 32);
 	//e < 32 ? state->i1 ^= 1 << e : state->i2 ^= 1 << (e - 32);
 	//op ? state->best_num_pegs-- : state->best_num_pegs++;
 }
 //bool solve(int* B, stack S, int num, ht board_ht, htkey state)
-bool solve(int* B,stack S,int num) {
+bool solve(int* B,stack S,int num, long long* st) {
 
 	if (num == 1)flag = 1;
 	if (flag == 1)return true;
@@ -144,15 +148,15 @@ bool solve(int* B,stack S,int num) {
 			get_operation(B,i, operation);
 			while (!stack_empty(operation)) {
 				int op = pop(operation);
-				excute(B, row_start(op), col_start(op), row_end(op), col_end(op));
+				excute(B, row_start(op), col_start(op), row_end(op), col_end(op),st);
 				//excute(B, row_start(op), col_start(op), row_end(op), col_end(op), true, state);
 				//print_board(B);
 				//if (!ht_lookup(board_ht, state) && solve(B, S, num - 1, board_ht, state))
-				if (!state[state_get(B)] && solve(B, S, num - 1)) {
+				if (!state.count(*st) && solve(B, S, num - 1,st)) {
 					push(S, op);
 					return true;
 				}
-				excute(B, row_start(op), col_start(op), row_end(op), col_end(op));
+				excute(B, row_start(op), col_start(op), row_end(op), col_end(op),st);
 				//excute(B, row_start(op), col_start(op), row_end(op), col_end(op), false, state);
 				//print_board(B);
 			}
@@ -167,10 +171,12 @@ bool solve(int* B,stack S,int num) {
 int peg_solve(int* B, stack S) {
 	int num = 0;
 	for (int i = 0; i < 8 * 8; i++)if (B[i] == 1)num++;
+	long long start_state = state_get(B);
+	long long* st = &start_state;
 	//ht board_ht = ht_new(1000);
 	//htkey start_state = board_state_get(B);
 	//return solve(B, S, num, board_ht, start_state);
-	return solve(B, S, num);
+	return solve(B, S, num, st);
 }
 //@requires is_board(B);
 //@requires num_pegs(B) >= 1;
