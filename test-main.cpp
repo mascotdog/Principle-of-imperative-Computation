@@ -130,8 +130,8 @@ int main() {
         cout << "解决方案验证失败！" << endl;
     }
     else {
-        cout << "未找到解决方案，最接近尝试的棋子数量为 ";
-        if (ans < 10) cout << "  个。\b\b\b\b\b\b\b";
+        cout << "未找到解决方案，最接近尝试的棋子数量为";
+        if (ans < 10) cout << ans <<"个。\b\b\b\b\b\b\b";
         else cout << "   个。\b\b\b\b\b\b\b\b";
     }
 

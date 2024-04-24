@@ -50,6 +50,7 @@ int left_rotate[64] = {
 
 int flag = 0;
 int start_chess_num = 0;
+int min_chess = 64;
 
 htkey board_state_get(int* B) {
 	int num = 0;
@@ -177,13 +178,13 @@ void excute(int* B, int row_s, int col_s, int row_e, int col_e,long long* st) {
 }
 //bool solve(int* B, stack S, int num, ht board_ht, htkey state)
 bool solve(int* B,stack S,int chess_num, long long* st) {
-
+	min_chess = min(min_chess, chess_num);
 	if (flag == 1)return true;
 	if (chess_num == 1) {
 		flag = 1;//退出
 		return true;
 	}
-
+	
 	int space_num = start_chess_num - chess_num + 1;
 	if (chess_num < space_num)flag = 0;//此时搜索棋子
 	else flag = 2;//此时搜索空格
@@ -228,7 +229,8 @@ int peg_solve(int* B, stack S) {
 	//ht board_ht = ht_new(1000);
 	//htkey start_state = board_state_get(B);
 	//return solve(B, S, num, board_ht, start_state);
-	return solve(B, S, num, st);
+	solve(B, S, num, st);
+	return min_chess;
 }
 //@requires is_board(B);
 //@requires num_pegs(B) >= 1;
