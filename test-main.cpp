@@ -71,7 +71,7 @@ bool verify_solution(int* B, stack S) {
             cout << "上一步不合法\n";
             return false;
         }
-        print_board(B);
+        //print_board(B);
     }
     if (!(num_pegs(B) == 1)) {
         cout << "最终位置不是赢棋局面\n";
