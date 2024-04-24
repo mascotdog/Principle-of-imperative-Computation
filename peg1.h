@@ -160,6 +160,8 @@ bool solve(int* B,stack S,int num, long long* st) {
 				//excute(B, row_start(op), col_start(op), row_end(op), col_end(op), false, state);
 				//print_board(B);
 			}
+			free(operation);
+			operation = NULL;
 		}
 	update_map(B);
 	//state[state_get(B)] = true;

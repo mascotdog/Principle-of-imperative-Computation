@@ -94,6 +94,12 @@ stack stack_new()
     return S;
 }
 
+//void stack_delete(stack S)
+//{
+//    free(S);
+//    S = NULL;
+//}
+
 void push(stack S, stackelem e)
 //@requires is_stack(S);
 //@ensures is_stack(S);
@@ -111,7 +117,10 @@ stackelem pop(stack S)
 //@ensures is_stack(S);
 {
     stackelem e = S->top->data;
-    S->top = S->top->next;
+    slist* p_delete = S->top;
+    S->top = S->top->next;    
+    free(p_delete);
+    p_delete = NULL;
     (S->size)--;
     return e;
 }
