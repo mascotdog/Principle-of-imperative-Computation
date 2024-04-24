@@ -33,7 +33,8 @@ int left_rotate[64] = {
 	56,57,58,59,60,61,62,63
 };
 
-bool flag = 0;
+int flag = 0;
+int start_chess_num = 0;
 
 htkey board_state_get(int* B) {
 	int num = 0;
@@ -97,12 +98,17 @@ int col_end(MOVE m) {
 	return m & 7;
 }
 
-bool operation_check(int* B,int row_mid,int col_mid,int row_e,int col_e) {
+bool operation_check_chess(int* B,int row_mid,int col_mid,int row_e,int col_e) {
 	if (row_mid < 0 || col_mid < 0 || row_e < 0 || col_e < 0)return false;
 	return B[row_mid * 8 + col_mid] == 1 && B[row_e * 8 + col_e] == 0;
 }
 
-void get_operation(int* B,int position, stack operation) {
+bool operation_check_space(int* B, int row_mid, int col_mid, int row_e, int col_e) {
+	if (row_mid < 0 || col_mid < 0 || row_e < 0 || col_e < 0)return false;
+	return B[row_mid * 8 + col_mid] == 1 && B[row_e * 8 + col_e] == 1;
+}
+
+void get_operation_chess(int* B,int position, stack operation) {
 	int row_s = position / 8;
 	int col_s = position % 8;
 
@@ -111,13 +117,31 @@ void get_operation(int* B,int position, stack operation) {
 		int col_e = col_s + jump_c[i];
 		int row_mid = row_s + mid_r[i];
 		int col_mid = col_s + mid_c[i];
-		if (operation_check(B,row_mid,col_mid,row_e,col_e)) {
+		if (operation_check_chess(B,row_mid,col_mid,row_e,col_e)) {
 			int op = row_s << 9 | col_s << 6 | row_e << 3 | col_e;
 			push(operation, op);
 		}	
 	}
 	return;
 }
+
+void get_operation_space(int* B, int position, stack operation) {
+	int row_s = position / 8;
+	int col_s = position % 8;
+
+	for (int i = 3; i >= 0; i--) {
+		int row_e = row_s + jump_r[i];
+		int col_e = col_s + jump_c[i];
+		int row_mid = row_s + mid_r[i];
+		int col_mid = col_s + mid_c[i];
+		if (operation_check_space(B, row_mid, col_mid, row_e, col_e)) {
+			int op = row_e << 9 | col_e << 6 | row_s << 3 | col_s;
+			push(operation, op);
+		}
+	}
+	return;
+}
+
 //void excute(int* B, int row_s, int col_s, int row_e, int col_e, bool op, htkey state)
 void excute(int* B, int row_s, int col_s, int row_e, int col_e,long long* st) {
 	int mid_r = row_s + row_e >> 1;
@@ -137,22 +161,32 @@ void excute(int* B, int row_s, int col_s, int row_e, int col_e,long long* st) {
 	//op ? state->best_num_pegs-- : state->best_num_pegs++;
 }
 //bool solve(int* B, stack S, int num, ht board_ht, htkey state)
-bool solve(int* B,stack S,int num, long long* st) {
+bool solve(int* B,stack S,int chess_num, long long* st) {
 
-	if (num == 1)flag = 1;
 	if (flag == 1)return true;
+	if (chess_num == 1) {
+		flag = 1;//退出
+		return true;
+	}
+
+	int space_num = start_chess_num - chess_num + 1;
+	if (chess_num < space_num)flag = 0;//此时搜索棋子
+	else flag = 2;//此时搜索空格
 
 	for (int i = 0; i < 8 * 8; i++)
-		if (B[i] == 1) {
+		if (B[i] == 1 && flag == 0 || B[i] == 0 && flag == 2) {
 			stack operation = stack_new();
-			get_operation(B,i, operation);
+
+			if(flag == 0)get_operation_chess(B,i, operation);
+			else if(flag == 2)get_operation_space(B,i, operation);
+
 			while (!stack_empty(operation)) {
 				int op = pop(operation);
 				excute(B, row_start(op), col_start(op), row_end(op), col_end(op),st);
 				//excute(B, row_start(op), col_start(op), row_end(op), col_end(op), true, state);
 				//print_board(B);
 				//if (!ht_lookup(board_ht, state) && solve(B, S, num - 1, board_ht, state))
-				if (!state.count(*st) && solve(B, S, num - 1,st)) {
+				if (!state.count(*st) && solve(B, S, chess_num - 1,st)) {
 					push(S, op);
 					return true;
 				}
@@ -173,6 +207,7 @@ bool solve(int* B,stack S,int num, long long* st) {
 int peg_solve(int* B, stack S) {
 	int num = 0;
 	for (int i = 0; i < 8 * 8; i++)if (B[i] == 1)num++;
+	start_chess_num = num;
 	long long start_state = state_get(B);
 	long long* st = &start_state;
 	//ht board_ht = ht_new(1000);
