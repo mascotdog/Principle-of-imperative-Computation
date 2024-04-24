@@ -6,10 +6,25 @@ using namespace std;
 unordered_map<long long, bool>state;
 
 typedef int MOVE;//9-11-row1 6-8-col1 3-5-row2 0-2-col2
+//int jump_r[4] = { -2,0,2,0 };
+//int jump_c[4] = { 0,2,0,-2 };
+//int mid_r[4] = { -1,0,1,0 };
+//int mid_c[4] = { 0,1,0,-1 };ÉÏÓÒÏÂ×ó 30s×óÓÒ
+
+//int jump_r[4] = { -2,2,0,0 };
+//int jump_c[4] = { 0,0,2,-2 };
+//int mid_r[4] = { -1,1,0,0 };
+//int mid_c[4] = { 0,0,1,-1 };//ÉÏÏÂÓÒ×ó 50s×óÓÒ
+
+//int jump_r[4] = { 0,0,-2,2 };
+//int jump_c[4] = { 2,-2,0,0 };
+//int mid_r[4] = { 0,0,-1,1 };
+//int mid_c[4] = { 1,-1,0,0};//ÓÒ×óÉÏÏÂ 70+
+
 int jump_r[4] = { -2,0,2,0 };
-int jump_c[4] = { 0,2,0,-2 };
+int jump_c[4] = { 0,-2,0,2 };
 int mid_r[4] = { -1,0,1,0 };
-int mid_c[4] = { 0,1,0,-1 };
+int mid_c[4] = { 0,-1,0,1 };//ÉÏ×óÏÂÓÒ 15s×óÓÒ
 
 int symmetry[64] = {
 	6, 5, 4, 3, 2, 1, 0, 7,
